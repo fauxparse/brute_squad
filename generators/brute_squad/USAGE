@@ -1,0 +1,8 @@
+Description:
+    Generates Brute Squad configuration files.
+
+Example:
+    ./script/generate brute_squad User
+
+    creates:
+        config/initializers/brute_squad
