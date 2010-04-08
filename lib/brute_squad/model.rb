@@ -1,7 +1,11 @@
 module BruteSquad
   class Model
-    attr_reader   :name
-    attr_accessor :singular, :class_name
+    include Support::Configurable
+    
+    attr_reader :name
+
+    configure(:singular)   { name.to_s.singularize.to_sym } 
+    configure(:class_name) { singular.to_s.classify }
     
     # Configure a new model for use with BruteSquad
     #
@@ -14,16 +18,10 @@ module BruteSquad
       @class_name = options[:class_name] if options[:class_name].present?
     end
     
-    def singular(value = nil)
-      @singular = value unless value.nil?
-      @singular || name.to_s.singularize.to_sym
+    def authenticate_with(*args)
+      
     end
-    
-    def class_name(value = nil)
-      @class_name = value unless value.nil?
-      @class_name || singular.to_s.classify
-    end
-    
+
   protected
     def klass #:nodoc:
       @class_name.constantize
