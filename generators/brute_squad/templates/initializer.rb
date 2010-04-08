@@ -1,0 +1,1 @@
+../../../lib/generators/brute_squad/templates/initializer.rb
