@@ -14,3 +14,5 @@ protected
     models[model.to_sym] ||= Model.new(model, options)
   end
 end
+
+require "brute_squad/rails"
