@@ -3,9 +3,8 @@ module BruteSquad
     module Configurable
       def self.included(base)
         base.extend ClassMethods
-        base.instance_variable_set :"@configuration_options", {}
-        class << base
-          alias_method_chain :inherited, :configuration_options
+        unless base.configuration_options.present?
+          base.write_inheritable_attribute :configuration_options, ActiveSupport::OrderedHash.new
         end
       end
       
@@ -25,7 +24,7 @@ module BruteSquad
       
       module ClassMethods
         def configuration_options
-          @configuration_options[self.name] ||= ActiveSupport::OrderedHash.new
+          read_inheritable_attribute :configuration_options
         end
         
         def configure(*args, &block)
@@ -52,11 +51,6 @@ module BruteSquad
             args.push(:default => args.pop)
             configure *args
           end
-        end
-
-        def inherited_with_configuration_options(base) #:nodoc:
-          inherited_without_configuration_options(base)
-          @configuration_options[base.name] = configuration_options.dup
         end
       end
     end
