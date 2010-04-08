@@ -1,3 +1,5 @@
+require "brute_squad/support"
+
 module BruteSquad
   def self.models
     @models ||= {}
@@ -15,4 +17,7 @@ protected
   end
 end
 
-require "brute_squad/rails"
+require "brute_squad/strategy"
+require "brute_squad/model"
+require "brute_squad/enforcer"
+require "brute_squad/rails" if defined? Rails
