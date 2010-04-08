@@ -25,7 +25,7 @@ module BruteSquad
     end
     
   protected
-    def klass
+    def klass #:nodoc:
       @class_name.constantize
     end
   end
