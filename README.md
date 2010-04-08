@@ -1,5 +1,5 @@
-BruteSquad
-==========
+Brute Squad
+===========
 
 > MIRACLE MAX: "Get away, I'm telling you, or I call the Brute Squad."
 > 
