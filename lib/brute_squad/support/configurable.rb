@@ -29,14 +29,14 @@ module BruteSquad
         
         def configure(*args, &block)
           if block_given?
-            args << (Hash === args.last ? args.pop : {}).merge(:default => block)
+            args << (args.extract_options!).merge(:default => block)
             configure *args
           elsif Hash === args.first
             args.first.each_pair do |name, default|
               configure name, :default => default
             end
-          elsif Hash === args.last
-            options = args.pop
+          else
+            options = args.extract_options!
             args.each do |name|
               configuration_options[name.to_sym] = options[:default]
               class_eval <<-EOS
@@ -47,9 +47,6 @@ module BruteSquad
                 alias_method :#{name}=, :#{name}
               EOS
             end
-          else Proc === args.last
-            args.push(:default => args.pop)
-            configure *args
           end
         end
       end

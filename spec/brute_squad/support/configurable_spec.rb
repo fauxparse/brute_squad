@@ -4,9 +4,9 @@ describe BruteSquad::Support::Configurable do
   class ConfigurableTestClass
     include BruteSquad::Support::Configurable
     
-    configure :simple => "Simple"
+    configure :simple, :default => "Simple"
     configure :complex => lambda { "#{simple} is not enough" }
-    configure :ike, :mike, "We think alike"
+    configure :ike, :mike, :default => "We think alike"
     configure(:with_block) { "I am a fish" }
   end
   
