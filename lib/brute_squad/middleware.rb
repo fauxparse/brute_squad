@@ -5,12 +5,7 @@ module BruteSquad
     end
 
     def call(env)
-      dup._call(env)
-    end
-
-  protected
-    def _call(env) #:nodoc:
-      @app.call(env)
+      Enforcer.process(@app, env)
     end
   end
 end

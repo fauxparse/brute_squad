@@ -30,9 +30,15 @@ module BruteSquad
     def authenticate_with(*args, &block)
       options = args.extract_options!
       args.each do |sym|
-        strategies[sym.to_sym] = returning Strategies[sym].new(options) do |strategy|
+        strategies[sym.to_sym] = returning Strategies[sym].new(self, options) do |strategy|
           strategy.instance_eval &block if block_given?
         end
+      end
+    end
+    
+    def prepare_request(request)
+      strategies.each do |_, strategy|
+        strategy.prepare_request request
       end
     end
     

@@ -21,6 +21,10 @@ module BruteSquad
     configuration_for model.to_sym
   end
   
+  def each(&block)
+    models.each &block
+  end
+  
   def default
     nil
   end
@@ -34,4 +38,5 @@ end
 require "brute_squad/strategies"
 require "brute_squad/model"
 require "brute_squad/enforcer"
+require "brute_squad/middleware"
 require "brute_squad/rails" if defined? Rails

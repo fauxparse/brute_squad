@@ -3,8 +3,15 @@ module BruteSquad
     class Strategy
       include Support::Configurable
 
-      def initialize(options = {})
-
+      attr_reader :model
+      
+      def initialize(model, options = {})
+        @model = model
+        @options = options
+      end
+      
+      def prepare_request(request)
+        
       end
     end
 
