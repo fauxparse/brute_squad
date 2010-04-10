@@ -37,6 +37,6 @@ end
 
 require "brute_squad/strategies"
 require "brute_squad/model"
+require "brute_squad/session"
 require "brute_squad/enforcer"
-require "brute_squad/middleware"
 require "brute_squad/rails" if defined? Rails

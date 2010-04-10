@@ -1,10 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe BruteSquad::Model do
-  before :each do
-    BruteSquad.models.clear
-  end
-  
   describe "created with defaults" do
     before :each do
       BruteSquad.authenticates :users

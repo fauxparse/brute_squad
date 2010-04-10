@@ -4,15 +4,15 @@ module BruteSquad
   class Enforcer
     attr_accessor :env, :request
     
-    def initialize(app, env)
-      @app, @env = app, env
-      @request = Rack::Request.new(@env)
-      @env[:brute_squad] = self
+    def initialize(app, &block)
+      @app = app
     end
     
-    def process
+    def call(env)
+      request = Rack::Request.new(env)
+      
       result = catch :brute_squad do
-        prepare
+        sessions = prepare_sessions env, request
         status, headers, response = @app.call(env)
       end
       
@@ -21,15 +21,6 @@ module BruteSquad
         send method, result
       else
         result
-      end
-    end
-    def self.process(app, env); new(app, env).process; end
-    
-    def method_missing(sym, *args)
-      case sym.to_s
-      when /^current_(.*)$/ then current($1.to_sym)
-      else
-        super
       end
     end
     
@@ -42,14 +33,14 @@ module BruteSquad
     end
     
   protected
-    def prepare
-      BruteSquad.each do |name, model|
-        model.prepare_request self
+    def prepare_sessions(env, request)
+      BruteSquad.models.inject({}) do |h, (name, model)|
+        returning Session.new(self, env, request) do |session|
+          h[name] = env["brute_squad.#{model.singular}.session"] = session
+          model.prepare session
+        end
+        h
       end
-    end
-    
-    def current(model)
-      nil
     end
     
     def redirect(params)

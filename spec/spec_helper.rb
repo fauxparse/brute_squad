@@ -10,5 +10,7 @@ Dir[File.join(File.dirname(__FILE__), "helpers", "**/*.rb")].each do |f|
 end
 
 Spec::Runner.configure do |config|
-
+  config.before :each do
+    BruteSquad.models.clear
+  end
 end

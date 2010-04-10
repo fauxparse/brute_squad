@@ -36,9 +36,9 @@ module BruteSquad
       end
     end
     
-    def prepare_request(request)
+    def prepare(session)
       strategies.each do |_, strategy|
-        strategy.prepare_request request
+        strategy.prepare session
       end
     end
     
