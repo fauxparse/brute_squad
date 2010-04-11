@@ -7,7 +7,12 @@ module BruteSquad
 
     configure(:singular)            { name.to_s.singularize.to_sym } 
     configure(:class_name)          { singular.to_s.classify }
+    configure :session_secret
+    configure :session_domain,      :default => nil
+    configure :session_expiry,      :default => 2.weeks
+    
     configure :authentication_keys, :default => [ :id ]
+    configure :retrieval_keys,      :default => [ :id, :auth_token ]
     configure :finder_method,       :default => :first
     
     # Configure a new model for use with BruteSquad

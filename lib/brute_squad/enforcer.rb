@@ -2,7 +2,7 @@ require "rack/utils"
 
 module BruteSquad
   class Enforcer
-    attr_accessor :env, :request
+    attr_accessor :env
     
     def initialize(app, options = {}, &block)
       @app = app
@@ -11,19 +11,21 @@ module BruteSquad
     end
     
     def call(env)
-      request = Rack::Request.new(env)
+      sessions = []
 
       result = catch :brute_squad do
-        sessions = prepare_sessions env, request
-        status, headers, response = @app.call(env)
+        sessions = prepare_sessions env
+        @app.call(env)
       end
       
-      if Hash === result
+      status, headers, response = if Hash === result
         method = result.delete :method
         send method, result
       else
         result
       end
+
+      sessions.values.inject(result) { |result, session| session.commit(*result) }
     end
     
     def authorize!(model, id)
@@ -35,9 +37,9 @@ module BruteSquad
     end
     
   protected
-    def prepare_sessions(env, request)
+    def prepare_sessions(env)
       BruteSquad.models.inject({}) do |h, (name, model)|
-        returning Session.new(self, model, env, request) do |session|
+        returning Session.new(self, model, env) do |session|
           h[name] = session
         end
         h
@@ -47,9 +49,7 @@ module BruteSquad
     def redirect(params)
       [
         params[:status] || 302,
-        {
-          "Location" => params[:location] || "/"
-        },
+        { "Location" => params[:location] || "/" },
         [ params[:message] || "You are being redirected" ]
       ]
     end

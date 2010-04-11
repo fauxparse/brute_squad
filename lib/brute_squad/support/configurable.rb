@@ -16,10 +16,9 @@ module BruteSquad
 
       def default_value_for(key)
         case (v = self.class.configuration_options[key])
-        when Proc   then instance_eval(&v)
-        when nil    then nil
-        when Symbol then v
-        else v.respond_to?(:dup) ? v.dup : v
+        when Proc then instance_eval(&v)
+        when nil then nil
+        else v.duplicable? ? v.dup : v
         end
       end
       

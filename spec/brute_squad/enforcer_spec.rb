@@ -3,7 +3,9 @@ require File.dirname(__FILE__) + '/../spec_helper'
 describe BruteSquad::Enforcer do
   before :each do
     BruteSquad.authenticates :users do
-      class_name    "BruteSquad::Spec::Helpers::TestUser"
+      class_name     "BruteSquad::Spec::Helpers::TestUser"
+      session_secret nil # unsigned sessions
+      retrieval_keys [ :id ]
     end
     
     @user = TestUser.new :name => "Test", :id => 1
@@ -16,7 +18,7 @@ describe BruteSquad::Enforcer do
   end
   
   it "should pass the current user in" do
-    env = env_with_params "/", {}, { 'HTTP_COOKIE' => 'brute_squad.users.id=1;' }
+    env = env_with_params "/", {}, { 'HTTP_COOKIE' => 'brute_squad.users.session="BAh7BjoHaWRJIgYxBjoNZW5jb2RpbmciClVURi04";' }
     setup_rack(success_app).call(env)
     env["brute_squad.users"].current.should == @user
   end
