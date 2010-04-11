@@ -19,8 +19,9 @@ module BruteSquad
       @strategies ||= {}
     end
     
-    def self.register(strategy, path)
-      autoload(strategies[strategy.to_sym] = strategy.to_s.classify.to_sym, path)
+    def self.register(strategy, path = nil)
+      strategies[strategy.to_sym] = strategy.to_s.classify.to_sym
+      autoload(strategies[strategy.to_sym], path) if path
     end
     
     def self.[](sym)

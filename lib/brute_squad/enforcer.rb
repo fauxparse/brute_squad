@@ -4,13 +4,15 @@ module BruteSquad
   class Enforcer
     attr_accessor :env, :request
     
-    def initialize(app, &block)
+    def initialize(app, options = {}, &block)
       @app = app
+      @options = options
+      BruteSquad.instance_eval &block if block_given?
     end
     
     def call(env)
       request = Rack::Request.new(env)
-      
+
       result = catch :brute_squad do
         sessions = prepare_sessions env, request
         status, headers, response = @app.call(env)
@@ -35,9 +37,8 @@ module BruteSquad
   protected
     def prepare_sessions(env, request)
       BruteSquad.models.inject({}) do |h, (name, model)|
-        returning Session.new(self, env, request) do |session|
-          h[name] = env["brute_squad.#{model.singular}.session"] = session
-          model.prepare session
+        returning Session.new(self, model, env, request) do |session|
+          h[name] = session
         end
         h
       end

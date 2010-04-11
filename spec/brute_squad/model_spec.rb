@@ -11,6 +11,7 @@ describe BruteSquad::Model do
       @model.name.should == :users
       @model.singular.should == :user
       @model.class_name.should == "User"
+      @model.finder_method.should == :first
     end
     
     it "should be listed in BruteSquad.models" do

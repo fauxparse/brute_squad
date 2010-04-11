@@ -5,8 +5,10 @@ module BruteSquad
     attr_reader :name
     attr_reader :strategies
 
-    configure(:singular)   { name.to_s.singularize.to_sym } 
-    configure(:class_name) { singular.to_s.classify }
+    configure(:singular)            { name.to_s.singularize.to_sym } 
+    configure(:class_name)          { singular.to_s.classify }
+    configure :authentication_keys, :default => [ :id ]
+    configure :finder_method,       :default => :first
     
     # Configure a new model for use with BruteSquad
     #
@@ -40,6 +42,16 @@ module BruteSquad
       strategies.each do |_, strategy|
         strategy.prepare session
       end
+    end
+    
+    def authentication_for(instance)
+      authentication_keys.inject({}) do |h, key|
+        h[key] = instance.send key
+      end
+    end
+    
+    def find_for_authentication(params)
+      klass.send finder_method, params
     end
     
   protected

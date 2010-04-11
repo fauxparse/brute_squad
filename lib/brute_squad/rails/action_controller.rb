@@ -15,7 +15,7 @@ module BruteSquad
           singular = model.singular
           class_eval <<-EOS
             def #{singular}_session
-              @brute_squad_#{singular}_session ||= request.env["brute_squad.#{singular}.session"]
+              @brute_squad_#{singular}_session ||= request.env["brute_squad.#{model}"]
             end
             def require_#{singular};    require_(:#{singular}); end
             def logged_in_#{singular}?; logged_in?(:#{singular}); end
