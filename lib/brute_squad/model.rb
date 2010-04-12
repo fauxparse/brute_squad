@@ -11,8 +11,7 @@ module BruteSquad
     configure :session_domain,      :default => nil
     configure :session_expiry,      :default => 2.weeks
     
-    configure :authentication_keys, :default => [ :id ]
-    configure :retrieval_keys,      :default => [ :id, :auth_token ]
+    configure :keys,                :default => [ :id ]
     configure :finder_method,       :default => :first
     
     # Configure a new model for use with BruteSquad
@@ -50,22 +49,43 @@ module BruteSquad
     end
     
     def authentication_for(instance)
-      authentication_keys.inject({}) do |h, key|
+      keys.inject({}) do |h, key|
         h[key] = instance.send key
+        h
       end
     end
     
     def find_for_authentication(params)
-      klass.send finder_method, params
+      klass.send finder_method, extract_finder_params(params)
+    end
+    
+    def attempt(candidate, params)
+      strategies.each_pair do |name, strategy|
+        if result = strategy.authenticate(candidate, params)
+          return strategy
+        end
+      end
+      false
+    end
+
+    def klass #:nodoc:
+      class_name.constantize
+    end
+    
+    def persist
+      false
     end
     
   protected
-    def klass #:nodoc:
-      @class_name.constantize
-    end
-    
     def strategies
       @strategies ||= ActiveSupport::OrderedHash.new
+    end
+    
+    def extract_finder_params(params)
+      params.inject({}) do |hash, (key, value)|
+        hash[key] = params[key] if keys.include?(key)
+        hash
+      end
     end
   end
 end

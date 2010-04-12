@@ -10,14 +10,12 @@ module BruteSquad::Spec
         )
     end
 
-    def setup_rack(app = nil, opts = {}, &block)
+    def setup_rack(app = nil, options = {}, &block)
       app ||= block if block_given?
-
-      opts[:failure_app]         ||= failure_app
 
       Rack::Builder.new do
         use BruteSquad::Spec::Helpers::Session
-        use BruteSquad::Enforcer, opts
+        use BruteSquad::Enforcer, options
         run app
       end
     end
@@ -32,6 +30,17 @@ module BruteSquad::Spec
 
     def failure_app
       lambda{ |e| [ 401, { "Content-Type" => "text/plain" }, [ "failure!" ] ] }
+    end
+    
+    def parse_cookies(headers)
+      returning({}) do |cookies|
+        if c = headers["Set-Cookie"]
+          Array(c).map { |s| s.split(';') }.flatten.each do |str|
+            k, v = str.split('=')
+            cookies[k.strip] = v.strip
+          end
+        end
+      end
     end
 
     class Session

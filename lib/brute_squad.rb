@@ -37,6 +37,7 @@ protected
 end
 
 require "brute_squad/strategies"
+require "brute_squad/encryption"
 require "brute_squad/model"
 require "brute_squad/session"
 require "brute_squad/enforcer"

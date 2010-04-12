@@ -24,7 +24,7 @@ module BruteSquad
     end
     
     def auth
-      @auth_request ||= AuthRequest.new(@env)
+      @auth_request ||= BasicAuthRequest.new(@env)
     end
     
     def [](key)
@@ -65,11 +65,25 @@ module BruteSquad
     end
     
     def redirect!(new_location = "/", options = {})
-      throw :brute_squad, options.merge(:method => :redirect, :location => new_location)
+      options[:message] ||= "You are being redirected"
+      throw :brute_squad, options.merge(:method => :redirect, :location => new_location, :session => self)
     end
     
-    def persist?
+    def log_out_and_redirect!(location)
+      clear_cookie
+      redirect! location, :message => "You have been logged out."
+    end
+    
+    def persisting?
       !@keys_to_persist.empty?
+    end
+    
+    def clear_cookie
+      @clearing = true
+    end
+    
+    def clearing?
+      @clearing || false
     end
   
     def load
@@ -94,7 +108,7 @@ module BruteSquad
     end
 
     def commit(status, headers, body)
-      if persist?
+      if persisting? || clearing?
         session_data = Marshal.dump(values_to_persist)
         session_data = [session_data].pack("m*")
 
@@ -116,8 +130,17 @@ module BruteSquad
       [status, headers, body]
     end
 
+    def attempt_login(params = {})
+      @candidate = model.find_for_authentication params
+      returning model.attempt(@candidate, params) do |result|
+        if result
+          authenticate! @candidate, true
+        end
+      end
+    end
+    
   protected
-    class AuthRequest < ::Rack::Auth::AbstractRequest
+    class BasicAuthRequest < ::Rack::Auth::AbstractRequest
       def basic?
         :basic == scheme
       end
@@ -132,8 +155,13 @@ module BruteSquad
     end
   
     def values_to_persist
-      @keys_to_persist.inject({}) do |h, k|
-        h[k] = values[k]
+      if clearing?
+        {}
+      else
+        @keys_to_persist.inject({}) do |h, k|
+          h[k] = values[k]
+          h
+        end
       end
     end
 
@@ -142,11 +170,19 @@ module BruteSquad
     end
 
     def fetch(auth_params = nil)
-      auth_params ||= model.retrieval_keys.inject({}) do |h, k|
+      auth_params ||= model.keys.inject({}) do |h, k|
         return nil unless h[k] = self[k]
         h
       end
       model.find_for_authentication auth_params
+    end
+    
+    def logger
+      @logger ||= if defined? Rails
+        Rails.logger
+      else
+        env["rack.logger"] || Logger.new(STDOUT)
+      end
     end
   end
 end

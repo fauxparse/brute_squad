@@ -11,26 +11,35 @@ module BruteSquad
     end
     
     def call(env)
-      sessions = []
-
+      sessions = {}
+      
       result = catch :brute_squad do
         sessions = prepare_sessions env
+        env["brute_squad"] = sessions
         @app.call(env)
       end
       
-      status, headers, response = if Hash === result
+      if Hash === result
         method = result.delete :method
-        send method, result
-      else
-        result
+        result = send method, result
       end
 
-      sessions.values.inject(result) { |result, session| session.commit(*result) }
+      sessions.inject(result) { |result, (_, session)| session.commit(*result) }
     end
     
   protected
+    class Collection < HashWithIndifferentAccess
+      def method_missing(sym, *args)
+        if key?(sym)
+          self[sym]
+        else
+          super
+        end
+      end
+    end
+  
     def prepare_sessions(env)
-      BruteSquad.models.inject({}) do |h, (name, model)|
+      BruteSquad.models.inject(Collection.new) do |h, (name, model)|
         returning Session.new(self, model, env) do |session|
           h[name] = session
         end

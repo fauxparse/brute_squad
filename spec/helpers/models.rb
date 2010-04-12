@@ -1,13 +1,17 @@
 module BruteSquad::Spec
   module Helpers
     class TestUser
-      attr_reader :name, :id, :email
+      attr_reader :name, :id, :email, :encrypted_password
       
       def initialize(params = {})
         params.each do |k, v|
           instance_variable_set :"@#{k}", v
         end
         self.class.instances << self
+      end
+      
+      def encrypted_password
+        BruteSquad::Encryption.default.encrypt "password"
       end
       
       def self.instances
