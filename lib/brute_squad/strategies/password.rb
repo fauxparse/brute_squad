@@ -23,18 +23,14 @@ module BruteSquad::Strategies
     end
     
     def authenticate(candidate, params)
-      if model.klass.respond_to?(:authenticate_with_password)
-        model.klass.authenticate_with_password candidate, params
+      return false if candidate.nil? || !params[:password].present?
+      
+      password_tokens = [ params[:password] ]
+      password_tokens << candidate.password_salt if candidate.respond_to? :password_salt
+      if keymaker.match?(candidate.encrypted_password, *password_tokens)
+        candidate
       else
-        return false if candidate.nil? || !params[:password].present?
-        
-        password_tokens = [ params[:password] ]
-        password_tokens << candidate.password_salt if candidate.respond_to? :password_salt
-        if keymaker.match?(candidate.encrypted_password, *password_tokens)
-          candidate
-        else
-          false
-        end
+        false
       end
     end
     
