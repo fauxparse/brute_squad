@@ -10,26 +10,27 @@ module BruteSquad
     configure :session_secret
     configure :session_domain,      :default => nil
     configure :session_expiry,      :default => 2.weeks
-    
     configure :keys,                :default => [ :id ]
-    configure :finder_method,       :default => :first
     
     # Configure a new model for use with BruteSquad
     #
     # Accepts the following options:
     # :singular::    Singular name for the model
     # :class_name::  Class name of the model to use
-    def initialize(model_name, options = {})
+    def initialize(model_name, options = {}, &block)
       @name = model_name.to_sym
-      configure_with options
+      configure_with options, &block
+      
+      install_modules InstanceMethods, ClassMethods
     end
     
     def to_sym; name;      end
     def to_s;   name.to_s; end
     
-    def configure_with(options)
+    def configure_with(options, &block)
       @singular   = options[:singular] if options[:singular].present?
       @class_name = options[:class_name] if options[:class_name].present?
+      instance_eval &block if block_given?
       self
     end
     
@@ -56,7 +57,7 @@ module BruteSquad
     end
     
     def find_for_authentication(params)
-      klass.send finder_method, extract_finder_params(params)
+      klass.find_for_authentication extract_finder_params(params)
     end
     
     def attempt(candidate, params)
@@ -74,6 +75,21 @@ module BruteSquad
     
     def persist
       false
+    end
+    
+    module ClassMethods
+      def find_for_authentication(params)
+        first params
+      end
+    end
+    
+    module InstanceMethods
+      
+    end
+    
+    def install_modules(instance_methods = nil, class_methods = nil)
+      klass.send :include, instance_methods if instance_methods
+      klass.extend class_methods if class_methods
     end
     
   protected

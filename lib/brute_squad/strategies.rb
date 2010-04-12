@@ -8,6 +8,10 @@ module BruteSquad
       def initialize(model, options = {})
         @model = model
         @options = options
+        @model.install_modules(
+          defined?(InstanceMethods) ? InstanceMethods : nil,
+          defined?(ClassMethods) ? ClassMethods : nil
+        )
       end
       
       def prepare_request(request)

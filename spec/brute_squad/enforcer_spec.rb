@@ -5,7 +5,7 @@ describe BruteSquad::Enforcer do
     BruteSquad.authenticates :users do
       class_name     "BruteSquad::Spec::Helpers::TestUser"
       session_secret nil # unsigned sessions
-      retrieval_keys [ :id ]
+      keys           [ :id ]
     end
     
     @user = TestUser.new :name => "Test", :id => 1
