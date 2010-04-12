@@ -28,14 +28,6 @@ module BruteSquad
       sessions.values.inject(result) { |result, session| session.commit(*result) }
     end
     
-    def authorize!(model, id)
-      
-    end
-    
-    def redirect!(new_location = "/", options = {})
-      throw :brute_squad, options.merge(:method => :redirect, :location => new_location)
-    end
-    
   protected
     def prepare_sessions(env)
       BruteSquad.models.inject({}) do |h, (name, model)|

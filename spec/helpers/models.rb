@@ -1,7 +1,7 @@
 module BruteSquad::Spec
   module Helpers
     class TestUser
-      attr_reader :name, :id
+      attr_reader :name, :id, :email
       
       def initialize(params = {})
         params.each do |k, v|

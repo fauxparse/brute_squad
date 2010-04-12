@@ -16,18 +16,4 @@ describe BruteSquad::Enforcer do
     setup_rack(success_app).call(env)
     env["brute_squad.users"].should be_an_instance_of(BruteSquad::Session)
   end
-  
-  it "should pass the current user in" do
-    env = env_with_params "/", {}, { 'HTTP_COOKIE' => 'brute_squad.users.session="BAh7BjoHaWRJIgYxBjoNZW5jb2RpbmciClVURi04";' }
-    setup_rack(success_app).call(env)
-    env["brute_squad.users"].current.should == @user
-  end
-  
-  describe "with a very simple strategy" do
-    before :each do
-      BruteSquad.authenticates :users do
-        authenticates_with :test_strategy
-      end
-    end
-  end
 end

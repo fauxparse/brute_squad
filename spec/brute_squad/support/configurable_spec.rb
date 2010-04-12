@@ -8,6 +8,7 @@ describe BruteSquad::Support::Configurable do
     configure :complex => lambda { "#{simple} is not enough" }
     configure :ike, :mike, :default => "We think alike"
     configure(:with_block) { "I am a fish" }
+    configure :boolean_default, :default => true
   end
   
   class ConfigurableTestClass2 < ConfigurableTestClass
@@ -20,7 +21,7 @@ describe BruteSquad::Support::Configurable do
     end
     
     it "should order its option keys" do
-      ConfigurableTestClass.configuration_options.keys.should == [ :simple, :complex, :ike, :mike, :with_block ]
+      ConfigurableTestClass.configuration_options.keys.should == [ :simple, :complex, :ike, :mike, :with_block, :boolean_default ]
     end
     
     it "should set a simple option" do
@@ -38,6 +39,11 @@ describe BruteSquad::Support::Configurable do
     
     it "should take a block at declaration time" do
       @object.with_block.should == "I am a fish"
+    end
+    
+    it "should be able to override with 'false' as a value" do
+      @object.boolean_default false
+      @object.boolean_default.should == false
     end
     
     it "should be able to set its defaults" do

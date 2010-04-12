@@ -18,6 +18,7 @@ module BruteSquad
         case (v = self.class.configuration_options[key])
         when Proc then instance_eval(&v)
         when nil then nil
+        when ActiveSupport::Duration then v
         else v.duplicable? ? v.dup : v
         end
       end
@@ -41,10 +42,11 @@ module BruteSquad
               configuration_options[name.to_sym] = options[:default]
               class_eval <<-EOS
                 def #{name}(*value)
-                  @#{name} = value.first if value.any?
+                  @#{name} = value.first if value.size > 0
                   @#{name}.nil? ? default_value_for(:#{name}) : @#{name}
                 end
                 alias_method :#{name}=, :#{name}
+                def #{name}?; !!#{name}; end
               EOS
             end
           end

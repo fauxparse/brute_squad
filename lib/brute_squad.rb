@@ -1,3 +1,4 @@
+require "rack"
 require "brute_squad/support"
 
 module BruteSquad

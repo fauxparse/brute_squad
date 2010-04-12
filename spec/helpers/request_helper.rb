@@ -1,8 +1,5 @@
 module BruteSquad::Spec
   module Helpers
-    SUCCESS_APP = lambda{ |e| [ 200, { "Content-Type" => "text/plain" }, [ "success!" ] ] }
-    FAILURE_APP = lambda{ |e| [ 401, { "Content-Type" => "text/plain" }, [ "failure!" ] ] }
-
     def env_with_params(path = "/", params = {}, env = {})
       method = params.fetch(:method, "GET")
       Rack::MockRequest.env_for path,
@@ -30,11 +27,11 @@ module BruteSquad::Spec
     end
 
     def success_app
-      BruteSquad::Spec::Helpers::FAILURE_APP
+      lambda{ |e| [ 200, { "Content-Type" => "text/plain" }, [ "success!" ] ] }
     end
 
     def failure_app
-      BruteSquad::Spec::Helpers::SUCCESS_APP
+      lambda{ |e| [ 401, { "Content-Type" => "text/plain" }, [ "failure!" ] ] }
     end
 
     class Session
