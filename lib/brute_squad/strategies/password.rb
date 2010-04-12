@@ -3,7 +3,7 @@ module BruteSquad::Strategies
     configure :login_fields, :default => [ :email ]
     configure :allow_basic, :default => true
     configure :allow_login_anywhere, :default => false
-    configure :encryption, :default => BruteSquad::Encryption.default
+    configure(:encryption) { BruteSquad::Encryption.default }
     
     def prepare(session)
       candidate = if allow_basic? && session.auth.provided? && session.auth.basic?
