@@ -8,6 +8,7 @@ begin
     gem.homepage       = "http://github.com/fauxparse/brute_squad"
     gem.authors        = ["Matt Powell"]
     gem.add_dependency   "activesupport", ">=2.3.5"
+    gem.add_dependency   "rack", ">=1.1.0"
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
