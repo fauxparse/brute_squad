@@ -72,32 +72,64 @@ describe BruteSquad::Strategies::Password do
   end
   
   describe "with HTTP basic auth" do
-    before :each do |variable|
-      @env = env_with_params "/", {}, { 'HTTP_AUTHORIZATION' => 'Basic dGVzdEBleGFtcGxlLmNvbTpwYXNzd29yZA==' }
-    end
-    
-    it "should allow login" do
-      setup_rack(success_app).call(@env)
-      @env["brute_squad"].users.current.should == @user
-    end
+    describe "and a valid password" do
+      before :each do |variable|
+        @env = env_with_params "/", {}, { 'HTTP_AUTHORIZATION' => 'Basic dGVzdEBleGFtcGxlLmNvbTpwYXNzd29yZA==' }
+      end
 
-    it "should not persist login" do
-      s, h, r = setup_rack(success_app).call(@env)
-      h['Set-Cookie'].should_not be_present
-    end
-    
-    describe "turned off" do
-      before :each do
-        BruteSquad.authenticates :users do
-          authenticate_with :password do
-            allow_basic false
+      it "should allow login" do
+        setup_rack(success_app).call(@env)
+        @env["brute_squad"].users.current.should == @user
+      end
+
+      it "should not persist login" do
+        s, h, r = setup_rack(success_app).call(@env)
+        h['Set-Cookie'].should_not be_present
+      end
+
+      describe "turned off" do
+        before :each do
+          BruteSquad.authenticates :users do
+            authenticate_with :password do
+              allow_basic false
+            end
           end
         end
+
+        it "should not allow login" do
+          setup_rack(success_app).call(@env)
+          @env["brute_squad"].users.should_not be_logged_in
+        end
+      end
+    end
+
+    describe "and an invalid password" do
+      before :each do |variable|
+        @env = env_with_params "/", {}, { 'HTTP_AUTHORIZATION' => 'Basic dGVzdEBleGFtcGxlLmNvbTpiYWRwYXNzd29yZA==' }
       end
 
       it "should not allow login" do
-        setup_rack(success_app).call(@env)
-        @env["brute_squad"].users.should_not be_logged_in
+        setup_rack(success_app).call(@env).first.should == 401
+      end
+
+      it "should not persist login" do
+        s, h, r = setup_rack(success_app).call(@env)
+        h['Set-Cookie'].should_not be_present
+      end
+    end
+
+    describe "and a bad username" do
+      before :each do |variable|
+        @env = env_with_params "/", {}, { 'HTTP_AUTHORIZATION' => 'Basic YmFkQGV4YW1wbGUuY29tOmJhZHBhc3N3b3Jk==' }
+      end
+
+      it "should not allow login" do
+        setup_rack(success_app).call(@env).first.should == 401
+      end
+
+      it "should not persist login" do
+        s, h, r = setup_rack(success_app).call(@env)
+        h['Set-Cookie'].should_not be_present
       end
     end
   end

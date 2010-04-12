@@ -18,9 +18,9 @@ module BruteSquad
         :expire_after => model.session_expiry
       }
             
+      env["brute_squad.#{model}"] = self
       load
       model.prepare self
-      env["brute_squad.#{model}"] = self
     end
     
     def auth
@@ -60,12 +60,13 @@ module BruteSquad
       set :current, model.authentication_for(instance), persist
     end
     
-    def fail!(message)
-      @errors << []
+    def deny!(options = {})
+      options[:message] ||= "Authentication failed."
+      throw :brute_squad, options.merge(:method => :deny)
     end
     
     def redirect!(new_location = "/", options = {})
-      options[:message] ||= "You are being redirected"
+      options[:message] ||= "You are being redirected."
       throw :brute_squad, options.merge(:method => :redirect, :location => new_location, :session => self)
     end
     
@@ -151,6 +152,10 @@ module BruteSquad
 
       def username
         credentials.first
+      end
+      
+      def password
+        credentials.second
       end
     end
   

@@ -9,9 +9,7 @@ module BruteSquad
   end
   
   def authenticates(model, options = {}, &block)
-    returning configuration_for(model, options) do |config|
-      config.instance_eval &block if block_given?
-    end
+    configuration_for model.to_sym, options, &block
   end
   
   def authenticates?(model)
@@ -31,8 +29,12 @@ module BruteSquad
   end
   
 protected
-  def configuration_for(model, options = {})
-    (models[model.to_sym] ||= Model.new(model)).configure_with(options)
+  def configuration_for(model, options = {}, &block)
+    if models[model]
+      models[model].configure_with options, &block
+    else
+      models[model] = Model.new model, options, &block
+    end
   end
 end
 

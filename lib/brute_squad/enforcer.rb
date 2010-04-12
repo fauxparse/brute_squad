@@ -51,7 +51,16 @@ module BruteSquad
       [
         params[:status] || 302,
         { "Location" => params[:location] || "/" },
-        [ params[:message] || "You are being redirected" ]
+        [ params[:message] || "You are being redirected." ]
+      ]
+    end
+    
+    def deny(params = {})
+      # TODO: send WWW-Authenticate header if appropriate
+      [
+        params[:status] || 401,
+        { },
+        [ params[:message] || "Authentication required." ]
       ]
     end
   end

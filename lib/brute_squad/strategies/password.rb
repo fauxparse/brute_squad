@@ -7,14 +7,17 @@ module BruteSquad::Strategies
     
     def prepare(session)
       candidate = if allow_basic? && session.auth.provided? && session.auth.basic?
-        session.candidate(login_fields.first => session.auth.username)
+        if candidate = session.candidate(login_fields.first => session.auth.username)
+          authenticate(candidate, :password => session.auth.password) || session.deny!
+        else
+          false
+        end
       elsif allow_login_anywhere?
         # for now, assume we can't just pick up authentication
         # parameters on any old request
       end
       
       if candidate
-        # TODO: check password
         session.authenticate! candidate
       end
     end
