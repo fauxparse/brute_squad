@@ -9,13 +9,22 @@ module BruteSquad
         @model = model
         @options = options
         @model.install_modules(
-          defined?(InstanceMethods) ? InstanceMethods : nil,
-          defined?(ClassMethods) ? ClassMethods : nil
+          self.class.helper_module(:InstanceMethods),
+          self.class.helper_module(:ClassMethods)
         )
       end
       
       def prepare_request(request)
         
+      end
+
+    protected
+      def self.helper_module(name)
+        begin
+          const_get name
+        rescue NameError
+          nil
+        end
       end
     end
 

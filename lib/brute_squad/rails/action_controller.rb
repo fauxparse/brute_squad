@@ -30,18 +30,26 @@ module BruteSquad
       
     protected
       def brute_squad
-        @brute_squad_session ||= request.env[:brute_squad_session]
+        @brute_squad_session ||= request.env["brute_squad"]
       end
     
       def logged_in?(model = nil)
-        model ||= BruteSquad.default
-        model && send(:"logged_in_#{model.singular}?")
+        return false unless model ||= BruteSquad.default
+        session = send(:"#{model}_session")
+        !!session && session.logged_in?
       end
     
       def require_(model)
-        unless logged_in?(model)
-          render :text => "Not logged in!"
+        if logged_in?(model)
+          logger.info user_session.current.inspect
+        else
+          redirect_to send(:"#{model}_sign_in_path") and return false
         end
+      end
+      
+      def attempt_login(model, params)
+        @session = send :"#{model}_session"
+        @session.attempt_login(params || {})
       end
     end
   end

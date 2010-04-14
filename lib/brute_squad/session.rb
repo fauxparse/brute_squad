@@ -132,11 +132,20 @@ module BruteSquad
     end
 
     def attempt_login(params = {})
+      params ||= {}
       @candidate = model.find_for_authentication params
-      returning model.attempt(@candidate, params) do |result|
+      returning model.attempt(@candidate, self, params) do |result|
         if result
           authenticate! @candidate, true
         end
+      end
+    end
+    
+    def method_missing(sym, *args)
+      if args.empty?
+        values[sym]
+      else
+        super
       end
     end
     

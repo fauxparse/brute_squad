@@ -1,6 +1,10 @@
 module BruteSquad
   module Encryption
     class Encryptor
+      def self.match?(encrypted, *tokens)
+        encrypt(*tokens) == encrypted
+      end
+      
       def self.to_sym
         name.underscore.to_sym
       end

@@ -14,10 +14,6 @@ module BruteSquad
           stretches.times { digest = Digest::SHA512.hexdigest(digest) }
           digest
         end
-        
-        def match?(encrypted, *tokens)
-          encrypt(*tokens) == encrypted
-        end
       end
     end
   end

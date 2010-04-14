@@ -22,6 +22,11 @@ module BruteSquad
       configure_with options, &block
       
       install_modules InstanceMethods, ClassMethods
+      klass.class_eval <<-EOS
+        def brute_squad
+          BruteSquad[:#{model_name}]
+        end
+      EOS
     end
     
     def to_sym; name;      end
@@ -60,9 +65,9 @@ module BruteSquad
       klass.find_for_authentication extract_finder_params(params)
     end
     
-    def attempt(candidate, params)
+    def attempt(candidate, session, params)
       strategies.each_pair do |name, strategy|
-        if result = strategy.authenticate(candidate, params)
+        if result = strategy.authenticate(candidate, session, params)
           return strategy
         end
       end
@@ -88,15 +93,16 @@ module BruteSquad
     end
     
     def install_modules(instance_methods = nil, class_methods = nil)
+      # TODO: this fails if class caching is turned off
       klass.send :include, instance_methods if instance_methods
       klass.extend class_methods if class_methods
     end
     
-  protected
     def strategies
       @strategies ||= ActiveSupport::OrderedHash.new
     end
     
+  protected
     def extract_finder_params(params)
       params.inject({}) do |hash, (key, value)|
         hash[key] = params[key] if keys.include?(key)
